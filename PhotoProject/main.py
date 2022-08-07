@@ -7,12 +7,14 @@
 
 from tkinter import *
 from tkinter import colorchooser, simpledialog, messagebox
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import File_selector
 import photo_set
 import os
 import csv
 import math
+
+import button_image
 
 image_album = []
 edit = 0
@@ -170,6 +172,7 @@ def frame_edit(img_num):
     global fr_th
     fr_th = Toplevel()
     fr_th.title("עיצוב מסגרת")
+    fr_th.overrideredirect(True)
     edit.destroy()
 
     bd_button = Button(fr_th, borderwidth=5, text="עובי", command=lambda: bd(img_num))
@@ -187,6 +190,7 @@ def edit_image(img_num):
 
     edit = Toplevel()
     edit.title('Edit')
+    edit.overrideredirect(True)
 
     button_rot_image = Button(edit, borderwidth=5, text="Rotate image", command=lambda: rotate_image(img_num))
     button_rot_image.grid(column=0, row=0, padx=10)
@@ -287,14 +291,18 @@ def save_board_img():
     result = File_selector.image_save()
 
     if result:
+        # root.update()
         x = def_frame.winfo_rootx()
         y = def_frame.winfo_rooty()
-        x1 = x + 1200+130
-        y1 = y + 780+100
-        ImageGrab.grab().crop((x, y, x1, y1)).resize((2600, 2000)).save(result, quality=100)
-        os.startfile(result, "print")
+        x1 = x + def_frame.winfo_width() * 1.25
+        y1 = y + def_frame.winfo_height() * 1.25
+        try:
+            ImageGrab.grab().crop((x, y, x1, y1)).save(result, quality=100)
+            os.startfile(result, "print")
+        except ValueError:
+            messagebox.showinfo('info', 'Image not saved')
 
-        return result
+
 
 
 def save_board():
@@ -380,28 +388,23 @@ def show_label():
 
     forget()
 
-    button_add_image = Button(root, borderwidth=5, text="Add image", command=add_image)
+    button_add_image = Button(root, borderwidth=0, bg='#3486eb', border=0, image=add_button_img, command=add_image)
     button_add_image.grid(column=0, row=2, pady=10)
-    exit_button = Button(root, borderwidth=5, bg="blue", fg="red", text="Exit", command=root.destroy)
+    exit_button = Button(root, borderwidth=0, bg='#3486eb', image=exit_button_img, command=root.destroy)
     exit_button.grid(column=1, row=2, pady=10)
-    load_button = Button(root, borderwidth=5, text="Load Board", command=load_board)
+    load_button = Button(root, borderwidth=0, bg='#3486eb', image=load_board_button_img, command=load_board)
     load_button.grid(column=2, row=2, pady=10)
 
     if len(image_album):
-        def_frame = Frame(root, bd=0, bg="white")
+        def_frame = Frame(root, bd=0, bg="#3486eb")
         def_frame.grid(column=0, row=0, padx=20, pady=20, columnspan=len(image_album))
-        save_button = Button(root, bd=5, text="Save Board To Image", command=save_board_img)
+        save_button = Button(root, bd=0, bg="#3486eb", image=save_image_button_img, command=save_board_img)
         save_button.grid(column=3, row=0, pady=10)
-        save_board_button = Button(root, bd=5, text="Save Board", command=save_board)
+        save_board_button = Button(root, bd=0, bg="#3486eb", image=save_board_button_img, command=save_board)
         save_board_button.grid(column=3, row=2, pady=10)
-    else:
-        pass
 
     if 3 <= len(image_album):
         def_frame.grid_configure(columnspan=3)
-
-    else:
-        pass
 
     if slc is not None:
         size_pxl_to_cm = tuple([math.ceil(x) for x in [x * 0.0264583333 for x in image_album[slc].size]])
@@ -409,17 +412,13 @@ def show_label():
         s_text_bd = "Frame thickness: " + str(image_album[slc].bd)
         status = Label(root, text=s_text_size + " " + s_text_bd, bd=1, relief=SUNKEN, anchor=W)
         status.grid(column=0, row=4, columnspan=4, sticky=E + W)
-    else:
-        pass
+
 
     if slc is not None and len(image_album) > 1:
         copy_button = Button(root, borderwidth=5, text="Copy appearance", command=cpy_app)
         copy_button.grid(column=1, row=3)
         loc_button = Button(root, borderwidth=5, text="change location", command=loc_img)
         loc_button.grid(column=2, row=3)
-
-    else:
-        pass
 
     try:
         edit.destroy()
@@ -447,14 +446,20 @@ def show_label():
 
             root.update()
 
-        else:
-            return
-
 
 root = Tk()
 root.attributes('-fullscreen', True)
-root.title('Photo printer')
+root.title('Photo Board')
 root.option_add("*font", "lucida 16 bold italic")
+root.config(bg='#3486eb')
+# root.wm_attributes('-transparentcolor', 'pink')
+# root.overrideredirect(True)
+
+add_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\add.png')
+exit_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\exit.png')
+load_board_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\load_board.png')
+save_board_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\save_board.png')
+save_image_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\save_image.png')
 
 
 show_label()
