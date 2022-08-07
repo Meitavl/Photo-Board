@@ -28,26 +28,28 @@ def_frame = 0
 def resize_image(img_num):
 
     # Resize image size according to user definition
-    width = simpledialog.askinteger("רוחב", "הכנס רוחב בס\"מ:")
-    height = simpledialog.askinteger("גובה", "הכנס גובה בס\"מ:")
+    width = simpledialog.askinteger("Width", "Insert width in cm:")
+    height = simpledialog.askinteger("Height", "Insert height in cm:")
     if width is not None and height is not None:
         if width > 0 and height > 0:
             image_album[img_num].photo_resize(math.floor(width / 0.0264583333), math.floor(height / 0.0264583333))
         elif width is not None and height is not None:
-            messagebox.showinfo("שינוי מידת תמונה", "לא הוזנו נתונים")
+            messagebox.showinfo("Info", "You must insert new dimensions")
         else:
-            messagebox.showinfo("שינוי מידת תמונה", """
-    לא בוצע שינוי
-    חובה להזין מידה גדולה מ- 0
+            messagebox.showinfo("Info", """
+    No change was made
+    Dimension must be bigger then 0
             """)
     else:
-        messagebox.showinfo("שינוי מידת תמונה", "לא הוזנו מידות")
+        messagebox.showinfo("Info", "You must insert new dimensions")
     show_label()
 
 
 def add_image():
+    global slc, copy, loc
 
     # Adding image to board , limited to 6 images
+    slc, copy, loc = None, 0, 0
     if len(image_album) < 6:
         try:
             image = File_selector.image_open()
@@ -55,11 +57,11 @@ def add_image():
                 image_set = photo_set.PhotoSet(image, len(image_album))
                 image_album.append(image_set)
             else:
-                messagebox.showinfo("בחירת תמונה", "לא נבחרה תמונה")
+                messagebox.showinfo("Info", "Image not selected")
         except AttributeError:
             print(' ')
     else:
-        messagebox.showinfo("הוספת תמונה", "מוגבל ל-6 תמונות בלוח")
+        messagebox.showinfo("Adding Image", "Limited to 6 image")
 
     show_label()
 
@@ -67,11 +69,11 @@ def add_image():
 def rotate_image(img_num):
 
     # Rotate image according to user definition
-    angle = simpledialog.askinteger("זווית", "הקלד זווית לשינוי")
+    angle = simpledialog.askinteger("Rotate", "Insert angle to rotate:")
     if angle:
         image_album[img_num].photo_rotate(angle)
     else:
-        messagebox.showinfo("סיבוב תמונה", "לא בוצע שינוי")
+        messagebox.showinfo("Info", "No change was made")
 
     show_label()
 
@@ -84,13 +86,15 @@ def replace(img_num):
         image_set = photo_set.PhotoSet(image, img_num)
         image_album[img_num] = image_set
     else:
-        messagebox.showinfo("החלפת תמונה", "לא בוצע שינוי")
+        messagebox.showinfo("Info", "No change was made")
 
     show_label()
 
 
 def remove(img_num):
+    global slc, copy, loc
 
+    slc, copy, loc = None, 0, 0
     # Removing an existing image from the board
     image_album.pop(img_num)
     for i in range(img_num, len(image_album)):
@@ -118,18 +122,18 @@ def color():
 def bd(img_num):
 
     # Frame border thickness changes according to the user definition
-    bd_frame = simpledialog.askinteger("Frame thickness", "הכנס גודל מסגרת")
+    bd_frame = simpledialog.askinteger("Frame thickness", "Insert frame thickness")
     if bd_frame:
         if bd_frame > 0:
             image_album[img_num].bd = bd_frame
             image_album[img_num].img_frame_size()
         else:
-            messagebox.showinfo("עובי מסגרת", """
-לא בוצע שינוי
-מידה חייבת להיות גדולה מ-0
+            messagebox.showinfo("Info", """
+No change
+Thickness need to be bigger then 0
         """)
     else:
-        messagebox.showinfo("עובי מסגרת", "לא בוצע שינוי")
+        messagebox.showinfo("info", "No change")
 
     show_label()
 
@@ -141,7 +145,7 @@ def bg(img_num):
     if bg_frame:
         image_album[img_num].bg = bg_frame
     else:
-        messagebox.showinfo("צבע מסגרת", "לא נבחר צבע")
+        messagebox.showinfo("Info", "No color selected")
 
     show_label()
 
@@ -171,14 +175,18 @@ def frame_edit(img_num):
     # Frame editing GUI
     global fr_th
     fr_th = Toplevel()
-    fr_th.title("עיצוב מסגרת")
+    fr_th.geometry('+1300+50')
     fr_th.overrideredirect(True)
     edit.destroy()
 
-    bd_button = Button(fr_th, borderwidth=5, text="עובי", command=lambda: bd(img_num))
-    bd_button.grid(row=0, column=0, padx=10)
-    bg_button = Button(fr_th, borderwidth=5, text="צבע", command=lambda: bg(img_num))
-    bg_button.grid(row=0, column=1, padx=10)
+    fr_th.wm_attributes('-transparentcolor', 'white')
+
+    frame_frame = Frame(fr_th, bd=0, bg='white')
+    frame_frame.grid(row=0, column=0)
+    bd_button = Button(frame_frame, borderwidth=0, bg='white', image=thick_button_img, command=lambda: bd(img_num))
+    bd_button.grid(row=0, column=0)
+    bg_button = Button(frame_frame, borderwidth=0, bg='white', image=color_button_img, command=lambda: bg(img_num))
+    bg_button.grid(row=1, column=0)
 
     fr_th.mainloop()
 
@@ -189,26 +197,31 @@ def edit_image(img_num):
     global edit
 
     edit = Toplevel()
-    edit.title('Edit')
+    # edit.title('Edit')
+    edit.geometry('+1300+50')
     edit.overrideredirect(True)
+    edit.wm_attributes('-transparentcolor', 'white')
 
-    button_rot_image = Button(edit, borderwidth=5, text="Rotate image", command=lambda: rotate_image(img_num))
-    button_rot_image.grid(column=0, row=0, padx=10)
+    edit_frame = Frame(edit, bd=0, bg="white")
+    edit_frame.grid(row=0, column=0)
 
-    button_res_image = Button(edit, borderwidth=5, text="Resize image", command=lambda: resize_image(img_num))
-    button_res_image.grid(column=1, row=0, padx=10)
+    button_rot_image = Button(edit_frame, borderwidth=0, bg="white", image=rotate_button_img, command=lambda: rotate_image(img_num))
+    button_rot_image.grid(row=0, column=0)
 
-    button_ext_edit = Button(edit, borderwidth=5, text="Close", command=edit.destroy)
-    button_ext_edit.grid(column=2, row=1, padx=10)
+    button_res_image = Button(edit_frame, borderwidth=0, bg="white", image=resize_button_img, command=lambda: resize_image(img_num))
+    button_res_image.grid(row=1, column=0)
 
-    button_rep = Button(edit, borderwidth=5, text="Replace image", command=lambda: replace(img_num))
-    button_rep.grid(column=0, row=1, padx=10)
+    button_rep = Button(edit_frame, borderwidth=0, bg="white", image=replace_loc_button_img, command=lambda: replace(img_num))
+    button_rep.grid(row=2, column=0)
 
-    button_remove = Button(edit, borderwidth=5, text="Remove image", command=lambda: remove(img_num))
-    button_remove.grid(column=1, row=1, padx=10)
+    button_remove = Button(edit_frame, borderwidth=0, bg="white", image=remove_button_img, command=lambda: remove(img_num))
+    button_remove.grid(row=3, column=0)
 
-    button_frame_edit = Button(edit, borderwidth=5, text="Frame edit", command=lambda: frame_edit(img_num))
-    button_frame_edit.grid(column=2, row=0, padx=10)
+    button_frame_edit = Button(edit_frame, borderwidth=0, bg="white", image=frame_edit_button_img, command=lambda: frame_edit(img_num))
+    button_frame_edit.grid(row=4, column=0)
+
+    button_ext_edit = Button(edit_frame, borderwidth=0, bg="white", image=close_button_img, command=edit.destroy)
+    button_ext_edit.grid(row=5, column=0)
 
     edit.mainloop()
 
@@ -228,8 +241,6 @@ def edit_image_event(event):
 
     if img_num is not None:
         edit_image(img_num)
-    else:
-        return
 
 
 def select_image(event):
@@ -269,9 +280,6 @@ def select_image(event):
         show_label()
         image_album[img_num].bg = image_bg
 
-    else:
-        return
-
 
 def img_num_loc(row, column):
 
@@ -279,8 +287,6 @@ def img_num_loc(row, column):
     for item in range(len(image_album)):
         if image_album[item].row == row and image_album[item].column == column:
             return item
-        else:
-            pass
 
 
 def save_board_img():
@@ -291,8 +297,8 @@ def save_board_img():
     result = File_selector.image_save()
 
     if result:
-        # root.update()
-        x = def_frame.winfo_rootx()
+        root.update()
+        x = 55 + def_frame.winfo_rootx()
         y = def_frame.winfo_rooty()
         x1 = x + def_frame.winfo_width() * 1.25
         y1 = y + def_frame.winfo_height() * 1.25
@@ -388,20 +394,22 @@ def show_label():
 
     forget()
 
-    button_add_image = Button(root, borderwidth=0, bg='#3486eb', border=0, image=add_button_img, command=add_image)
-    button_add_image.grid(column=0, row=2, pady=10)
-    exit_button = Button(root, borderwidth=0, bg='#3486eb', image=exit_button_img, command=root.destroy)
-    exit_button.grid(column=1, row=2, pady=10)
-    load_button = Button(root, borderwidth=0, bg='#3486eb', image=load_board_button_img, command=load_board)
-    load_button.grid(column=2, row=2, pady=10)
+    button_frame = Frame(root, bd=0, bg="#3486eb")
+    button_frame.grid(column=0, row=0, rowspan=5)
+    button_add_image = Button(button_frame, borderwidth=0, bg='#3486eb', border=0, image=add_button_img, command=add_image)
+    button_add_image.grid(column=0, row=0, pady=10)
+    exit_button = Button(button_frame, borderwidth=0, bg='#3486eb', image=exit_button_img, command=root.destroy)
+    exit_button.grid(column=0, row=5, pady=10)
+    load_button = Button(button_frame, borderwidth=0, bg='#3486eb', image=load_board_button_img, command=load_board)
+    load_button.grid(column=0, row=1, pady=10)
 
     if len(image_album):
         def_frame = Frame(root, bd=0, bg="#3486eb")
-        def_frame.grid(column=0, row=0, padx=20, pady=20, columnspan=len(image_album))
-        save_button = Button(root, bd=0, bg="#3486eb", image=save_image_button_img, command=save_board_img)
-        save_button.grid(column=3, row=0, pady=10)
-        save_board_button = Button(root, bd=0, bg="#3486eb", image=save_board_button_img, command=save_board)
-        save_board_button.grid(column=3, row=2, pady=10)
+        def_frame.grid(column=1, row=0, padx=20, pady=10, columnspan=len(image_album), rowspan=2)
+        save_button = Button(button_frame, bd=0, bg="#3486eb", image=save_image_button_img, command=save_board_img)
+        save_button.grid(column=0, row=2, pady=10)
+        save_board_button = Button(button_frame, bd=0, bg="#3486eb", image=save_board_button_img, command=save_board)
+        save_board_button.grid(column=0, row=3, pady=10)
 
     if 3 <= len(image_album):
         def_frame.grid_configure(columnspan=3)
@@ -410,14 +418,14 @@ def show_label():
         size_pxl_to_cm = tuple([math.ceil(x) for x in [x * 0.0264583333 for x in image_album[slc].size]])
         s_text_size = "Image size: " + str(size_pxl_to_cm)
         s_text_bd = "Frame thickness: " + str(image_album[slc].bd)
-        status = Label(root, text=s_text_size + " " + s_text_bd, bd=1, relief=SUNKEN, anchor=W)
-        status.grid(column=0, row=4, columnspan=4, sticky=E + W)
+        status = Label(root, bg="#3486eb", text=s_text_size + " " + s_text_bd, anchor=SW)
+        status.grid(column=0, row=4, columnspan=3, sticky=E + W)
 
 
     if slc is not None and len(image_album) > 1:
-        copy_button = Button(root, borderwidth=5, text="Copy appearance", command=cpy_app)
+        copy_button = Button(root, borderwidth=0, bg="#3486eb", image=copy_ap_button_img, command=cpy_app)
         copy_button.grid(column=1, row=3)
-        loc_button = Button(root, borderwidth=5, text="change location", command=loc_img)
+        loc_button = Button(root, borderwidth=0, bg="#3486eb", image=cha_loc_button_img, command=loc_img)
         loc_button.grid(column=2, row=3)
 
     try:
@@ -432,12 +440,12 @@ def show_label():
         elif 3 <= num < 6:
             image_album[num].img_grid(2, num - 3)
         else:
-            messagebox.showinfo("הגבלה", "מוגבל ל-6 תמונות")
+            messagebox.showinfo("Info", "Limited to 6 Images")
 
         if num < 6:
             # Frame for image
             frame = Frame(def_frame, bd=0, height=image_album[num].frame_size[1], bg=image_album[num].bg)
-            frame.grid(column=image_album[num].column, row=image_album[num].row, pady=20, padx=20)
+            frame.grid(column=image_album[num].column, row=image_album[num].row, pady=10, padx=20)
 
             # showing image on screen
             image_label = Label(frame, borderwidth=0, image=image_album[num].photo)
@@ -452,7 +460,7 @@ root.attributes('-fullscreen', True)
 root.title('Photo Board')
 root.option_add("*font", "lucida 16 bold italic")
 root.config(bg='#3486eb')
-# root.wm_attributes('-transparentcolor', 'pink')
+# root.wm_attributes('-transparentcolor', 'white')
 # root.overrideredirect(True)
 
 add_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\add.png')
@@ -460,6 +468,16 @@ exit_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Proje
 load_board_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\load_board.png')
 save_board_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\save_board.png')
 save_image_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\save_image.png')
+copy_ap_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\copy_appearance.png')
+cha_loc_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\change_loc.png')
+rotate_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\rotate.png')
+resize_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\resize.png')
+close_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\close.png')
+remove_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\remove.png')
+replace_loc_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\replace.png')
+frame_edit_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\frame_edit.png')
+thick_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\thickness.png')
+color_button_img = PhotoImage(file=r'C:\Users\Meitav\Documents\GitHub\Photo-Project\color.png')
 
 
 show_label()
