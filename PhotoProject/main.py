@@ -421,7 +421,6 @@ def show_label():
         status = Label(root, bg="#3486eb", text=s_text_size + " " + s_text_bd, anchor=SW)
         status.grid(column=1, row=4, columnspan=3, sticky=E + W)
 
-
     if slc is not None and len(image_album) > 1:
         copy_button = Button(root, borderwidth=0, bg="#3486eb", image=copy_ap_button_img, command=cpy_app)
         copy_button.grid(column=1, row=3)
