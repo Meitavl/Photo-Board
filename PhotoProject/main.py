@@ -419,7 +419,7 @@ def show_label():
         s_text_size = "Image size: " + str(size_pxl_to_cm)
         s_text_bd = "Frame thickness: " + str(image_album[slc].bd)
         status = Label(root, bg="#3486eb", text=s_text_size + " " + s_text_bd, anchor=SW)
-        status.grid(column=0, row=4, columnspan=3, sticky=E + W)
+        status.grid(column=1, row=4, columnspan=3, sticky=E + W)
 
 
     if slc is not None and len(image_album) > 1:
